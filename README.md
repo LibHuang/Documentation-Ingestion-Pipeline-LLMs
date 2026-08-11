@@ -15,33 +15,33 @@ PDF → S3 → PostgreSQL → Chunking → Embeddings → Pinecone → Anthropic
 
 ## Pipeline Stages
 
-### Stage 1 — Document Ingestion
+### Stage 1: Document Ingestion
 - Generates MD5 hash fingerprint per document for automatic deduplication
 - Uploads raw PDF to AWS S3 Buckets
 - Writes metadata record to PostgreSQL tracking `doc_id`, `source_path`, `status`, `ingested_at`
 - Duplicate documents are caught and skipped automatically via `ON CONFLICT DO NOTHING`
 
-### Stage 2 — Text Extraction
+### Stage 2: Text Extraction
 - Pulls PDF bytes directly from S3 into memory
 - Extracts full text using PyMuPDF (fitz)
 - Handles text-based PDFs natively
 
-### Stage 3 — Chunking
+### Stage 3: Chunking
 - Splits extracted text into 500-character overlapping chunks
 - 100-character overlap prevents critical information loss at chunk boundaries
 - Overlap ensures no sentence is orphaned between chunks
 
-### Stage 4 — Embedding
+### Stage 4: Embedding
 - Converts each chunk into a 384-dimension dense vector using `all-MiniLM-L6-v2`
 - Model runs completely locally with zero API cost, zero external calls
 - Same model used for both document chunks and query embedding at retrieval time
 
-### Stage 5 — Vector Storage
+### Stage 5: Vector Storage
 - Uploads all vectors to Pinecone with metadata: `doc_id`, `chunk_index`, `text`
 - Index configured: dense vectors, cosine similarity, 384 dimensions
 - Enables millisecond similarity search across any number of documents
 
-### Stage 6 — RAG Query Layer
+### Stage 6: RAG Query Layer
 - Embeds incoming question using same local model
 - Queries Pinecone for top 5 semantically similar chunks
 - Sends only relevant chunks as context to Claude Sonnet
