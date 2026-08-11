@@ -2,13 +2,11 @@
 
 This project is a production-grade RAG (Retrieval Augmented Generation) pipeline that transforms static PDF documents into a queryable knowledge base leveraging AI. Built to mirror the architecture of enterprise document processing platforms used in regulated industries.
 
----
 
 ## What It Does
 
 This process allows you to upload any PDF into the pipeline to get accurate answers pulled directly from the document in approximately 1-3 seconds, at less than one cent per query.
 
----
 
 ## Architecture
 PDF → S3 → PostgreSQL → Chunking → Embeddings → Pinecone → Anthropic Claude API → Answer
@@ -24,7 +22,7 @@ PDF → S3 → PostgreSQL → Chunking → Embeddings → Pinecone → Anthropic
 - Duplicate documents are caught and skipped automatically via `ON CONFLICT DO NOTHING`
 
 ### Stage 2 — Text Extraction
-- Pulls PDF bytes directly from S3 into memory — no local disk writes
+- Pulls PDF bytes directly from S3 into memory
 - Extracts full text using PyMuPDF (fitz)
 - Handles text-based PDFs natively
 
@@ -35,7 +33,7 @@ PDF → S3 → PostgreSQL → Chunking → Embeddings → Pinecone → Anthropic
 
 ### Stage 4 — Embedding
 - Converts each chunk into a 384-dimension dense vector using `all-MiniLM-L6-v2`
-- Model runs completely locally — zero API cost, zero external calls
+- Model runs completely locally with zero API cost, zero external calls
 - Same model used for both document chunks and query embedding at retrieval time
 
 ### Stage 5 — Vector Storage
